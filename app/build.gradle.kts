@@ -107,7 +107,7 @@ android {
     logger.warnInBox("Building ${defaultConfig.applicationId} ($baseAppName) [$buildType]")
 
     buildTypes {
-        val oidcRedirectSchemeBase = BuildTimeConfig.METADATA_HOST_REVERSED ?: "io.element.android"
+        val oidcRedirectSchemeBase = BuildTimeConfig.METADATA_HOST_REVERSED ?: "com.chatnit.android"
         getByName("debug") {
             resValue("string", "app_name", "$baseAppName dbg")
             resValue(
