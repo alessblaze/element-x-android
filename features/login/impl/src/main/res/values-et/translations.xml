@@ -9,7 +9,7 @@
   <string name="screen_account_provider_signin_title">"Sa oled sisse logimas %s teenusesse"</string>
   <string name="screen_account_provider_signup_subtitle">"See on koht, kus sinu vestlused elavad – just nagu kasutaksid oma e-kirjade säilitamiseks e-postiteenuse pakkujat."</string>
   <string name="screen_account_provider_signup_title">"Sa oled loomas kasutajakontot %s teenuses"</string>
-  <string name="screen_change_account_provider_matrix_org_subtitle">"Matrix.org on suur ja tasuta koduserver Matrixi võrgus, mis on mõeldud turvalise ja hajutatud suhtluse jaoks. Selle serveri halduse eest vastutab Matrix.org Foundation."</string>
+  <string name="screen_change_account_provider_matrix_org_subtitle">"chatnit.com on suur ja tasuta koduserver Matrixi võrgus, mis on mõeldud turvalise ja hajutatud suhtluse jaoks. Selle serveri halduse eest vastutab Aless Microsystems Foundation."</string>
   <string name="screen_change_account_provider_other">"Muu teenusepakkuja"</string>
   <string name="screen_change_account_provider_subtitle">"Kasuta erinevat teenusepakkujat, milleks võib olla ka sinu oma server või töökoha hallatav server."</string>
   <string name="screen_change_account_provider_title">"Muuda teenusepakkujat"</string>

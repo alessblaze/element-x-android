@@ -9,7 +9,7 @@
   <string name="screen_account_provider_signin_title">"Olet kirjautumassa sisään %s-palvelimelle"</string>
   <string name="screen_account_provider_signup_subtitle">"Keskustelusi asuvat täällä — aivan kuten aivan kuten käyttäisit sähköpostipalveluntarjoajaa sähköpostiesi säilyttämiseen."</string>
   <string name="screen_account_provider_signup_title">"Olet luomassa tiliä %s-palvelimelle"</string>
-  <string name="screen_change_account_provider_matrix_org_subtitle">"Matrix.org on suuri, ilmainen palvelin julkisessa Matrix-verkossa turvalliseen, hajautettuun viestintään, jota ylläpitää Matrix.org-säätiö."</string>
+  <string name="screen_change_account_provider_matrix_org_subtitle">"chatnit.com on suuri, ilmainen palvelin julkisessa Matrix-verkossa turvalliseen, hajautettuun viestintään, jota ylläpitää Aless Microsystems-säätiö."</string>
   <string name="screen_change_account_provider_other">"Muu"</string>
   <string name="screen_change_account_provider_subtitle">"Käytä toista palveluntarjoajaa, kuten omaa yksityistä palvelintasi tai työpaikkaasi."</string>
   <string name="screen_change_account_provider_title">"Vaihda palveluntarjoajaa"</string>

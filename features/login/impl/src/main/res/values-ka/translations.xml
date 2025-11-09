@@ -9,7 +9,7 @@
   <string name="screen_account_provider_signin_title">"თქვენ აპირებთ შესვლას %s-ში"</string>
   <string name="screen_account_provider_signup_subtitle">"აქ იქნება თქვენი საუბრები - ისევე, როგორც თქვენ ელ. ფოსტაში ინახება თქვენი ელ.წერილები."</string>
   <string name="screen_account_provider_signup_title">"თქვენ აპირებთ ანგარიშის შექმნას %s-ში"</string>
-  <string name="screen_change_account_provider_matrix_org_subtitle">"Matrix.org არის დიდი, უფასო სერვერი საჯარო Matrix ქსელში უსაფრთხო, დეცენტრალიზებული კომუნიკაციისთვის, რომელსაც მართავს Matrix.org ფონდი."</string>
+  <string name="screen_change_account_provider_matrix_org_subtitle">"chatnit.com არის დიდი, უფასო სერვერი საჯარო Matrix ქსელში უსაფრთხო, დეცენტრალიზებული კომუნიკაციისთვის, რომელსაც მართავს Aless Microsystems ფონდი."</string>
   <string name="screen_change_account_provider_other">"სხვა"</string>
   <string name="screen_change_account_provider_subtitle">"გამოიყენეთ სხვა ანგარიშის პროვაიდერი, როგორიცაა თქვენი პირადი სერვერი ან სამუშაო ანგარიში."</string>
   <string name="screen_change_account_provider_title">"შეცვალეთ ანგარიშის მომწოდებელი"</string>

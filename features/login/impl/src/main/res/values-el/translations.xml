@@ -9,7 +9,7 @@
   <string name="screen_account_provider_signin_title">"Πρόκειται να συνδεθείς στο %s"</string>
   <string name="screen_account_provider_signup_subtitle">"Εδώ θα ζουν οι συνομιλίες σου - όπως θα χρησιμοποιούσες έναν πάροχο email για να διατηρήσεις τα email σου."</string>
   <string name="screen_account_provider_signup_title">"Πρόκειται να δημιουργήσεις έναν λογαριασμό στο %s"</string>
-  <string name="screen_change_account_provider_matrix_org_subtitle">"Το Matrix.org είναι ένας μεγάλος, δωρεάν διακομιστής στο δημόσιο δίκτυο Matrix για ασφαλή, αποκεντρωμένη επικοινωνία, που διευθύνεται από το Ίδρυμα Matrix.org."</string>
+  <string name="screen_change_account_provider_matrix_org_subtitle">"Το chatnit.com είναι ένας μεγάλος, δωρεάν διακομιστής στο δημόσιο δίκτυο Matrix για ασφαλή, αποκεντρωμένη επικοινωνία, που διευθύνεται από το Ίδρυμα Aless Microsystems."</string>
   <string name="screen_change_account_provider_other">"Άλλο"</string>
   <string name="screen_change_account_provider_subtitle">"Χρησιμοποίησε διαφορετικό πάροχο λογαριασμού, όπως τον δικό σου ιδιωτικό διακομιστή ή έναν εργασιακό λογαριασμό."</string>
   <string name="screen_change_account_provider_title">"Αλλαγή παρόχου λογαριασμού"</string>

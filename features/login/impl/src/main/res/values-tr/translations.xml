@@ -9,7 +9,7 @@
   <string name="screen_account_provider_signin_title">"Oturum açmak üzeresiniz %s"</string>
   <string name="screen_account_provider_signup_subtitle">"Konuşmalarınızın saklanacağı yer burasıdır - tıpkı e-postalarınızı saklamak için bir e-posta sağlayıcısı kullandığınız gibi."</string>
   <string name="screen_account_provider_signup_title">"%s üzerinde bir hesap oluşturmak üzeresiniz"</string>
-  <string name="screen_change_account_provider_matrix_org_subtitle">"Matrix.org, Matrix.org Vakfı tarafından yönetilen, güvenli, merkezi olmayan iletişim için halka açık Matrix ağında büyük, ücretsiz bir sunucudur."</string>
+  <string name="screen_change_account_provider_matrix_org_subtitle">"chatnit.com, Aless Microsystems Vakfı tarafından yönetilen, güvenli, merkezi olmayan iletişim için halka açık Matrix ağında büyük, ücretsiz bir sunucudur."</string>
   <string name="screen_change_account_provider_other">"Diğer"</string>
   <string name="screen_change_account_provider_subtitle">"Kendi özel sunucunuz veya iş hesabınız gibi farklı bir hesap sağlayıcı kullanın."</string>
   <string name="screen_change_account_provider_title">"Hesap sağlayıcısını değiştir"</string>

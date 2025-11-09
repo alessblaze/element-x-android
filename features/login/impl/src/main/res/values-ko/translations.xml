@@ -9,7 +9,7 @@
   <string name="screen_account_provider_signin_title">"%s에 로그인합니다"</string>
   <string name="screen_account_provider_signup_subtitle">"이곳이 귀하의 대화 공간입니다 — 이메일 제공업체를 사용해 이메일을 관리하는 것처럼 말이죠."</string>
   <string name="screen_account_provider_signup_title">"%s 에서 계정을 생성하려고 합니다."</string>
-  <string name="screen_change_account_provider_matrix_org_subtitle">"Matrix.org는 Matrix.org 재단이 운영하는, 안전하고 분산된 통신을 위한 공개 Matrix 네트워크의 대규모 무료 서버입니다."</string>
+  <string name="screen_change_account_provider_matrix_org_subtitle">"chatnit.com는 Aless Microsystems 재단이 운영하는, 안전하고 분산된 통신을 위한 공개 Matrix 네트워크의 대규모 무료 서버입니다."</string>
   <string name="screen_change_account_provider_other">"기타"</string>
   <string name="screen_change_account_provider_subtitle">"다른 계정 제공업체를 사용하세요. 예를 들어 자체 사설 서버나 업무용 계정 등을 사용할 수 있습니다."</string>
   <string name="screen_change_account_provider_title">"계정 제공자 변경"</string>

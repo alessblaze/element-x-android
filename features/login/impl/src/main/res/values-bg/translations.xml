@@ -9,7 +9,7 @@
   <string name="screen_account_provider_signin_title">"На път сте да влезете в %s"</string>
   <string name="screen_account_provider_signup_subtitle">"Това е мястото, където ще живеят вашите разговори — точно както бихте използвали имейл доставчик, за да съхранявате вашите имейли."</string>
   <string name="screen_account_provider_signup_title">"На път сте да създадете акаунт в %s"</string>
-  <string name="screen_change_account_provider_matrix_org_subtitle">"Matrix.org е голям, безплатен сървър в публичната мрежа на Matrix за сигурна, децентрализирана комуникация, управляван от фондация Matrix.org."</string>
+  <string name="screen_change_account_provider_matrix_org_subtitle">"chatnit.com е голям, безплатен сървър в публичната мрежа на Matrix за сигурна, децентрализирана комуникация, управляван от фондация Aless Microsystems."</string>
   <string name="screen_change_account_provider_other">"Друг"</string>
   <string name="screen_change_account_provider_subtitle">"Използвайте друг доставчик на акаунт, като например собствен частен сървър или работен акаунт."</string>
   <string name="screen_change_account_provider_title">"Промяна на доставчика на акаунт"</string>

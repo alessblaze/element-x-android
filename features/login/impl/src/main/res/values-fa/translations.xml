@@ -9,7 +9,7 @@
   <string name="screen_account_provider_signin_title">"دارید وارد %s می‌شوید"</string>
   <string name="screen_account_provider_signup_subtitle">"جایی که گفت‌وگوهایتان خواهند زیست — درست مثل استفاده‌تان از فراهم کنندهٔ رایانامه‌ای برای نگه داشتن رایانامه‌هایتان."</string>
   <string name="screen_account_provider_signup_title">"دارید حسابی روی %s می‌سازید"</string>
-  <string name="screen_change_account_provider_matrix_org_subtitle">"ماتریکس‌دات‌اورگ کارسازی بزرگ و آزاد روی شبکهٔ ماتریکس عمومی برای ارتباطات نامتمرکز و امن است که به دست بنیاد ماتریکس‌دات‌اورگ اداره می‌شود."</string>
+  <string name="screen_change_account_provider_matrix_org_subtitle">"chatnit.com یک پروژه بزرگ و متن‌باز است که بر روی شبکه عمومی ماتریکس برای ارتباطات غیرمتمرکز و امن ساخته شده و توسط بنیاد Aless Microsystems اداره می‌شود."</string>
   <string name="screen_change_account_provider_other">"دیگر"</string>
   <string name="screen_change_account_provider_subtitle">"استفاده از فراهم کنندهٔ حسابی دیگر چون کارساز خصوصی خوتان یا حسابی کاری."</string>
   <string name="screen_change_account_provider_title">"تغییر فراهم کنندهٔ حساب"</string>

@@ -76,6 +76,10 @@ captures/
 #*.jks
 #*.keystore
 
+#apps and keys
+/app/gplay/
+/app/signature/ams-release.jks
+
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild
 .cxx/

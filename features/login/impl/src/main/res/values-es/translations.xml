@@ -9,7 +9,7 @@
   <string name="screen_account_provider_signin_title">"Estás a punto de iniciar sesión en %s"</string>
   <string name="screen_account_provider_signup_subtitle">"Aquí es donde se alojarán tus conversaciones — justo como utilizarías un proveedor de correo electrónico para guardar tus correos electrónicos."</string>
   <string name="screen_account_provider_signup_title">"Estás a punto de crear una cuenta en %s"</string>
-  <string name="screen_change_account_provider_matrix_org_subtitle">"Matrix.org es un servidor grande y gratuito en la red pública Matrix para una comunicación segura y descentralizada, administrado por la Fundación Matrix.org."</string>
+  <string name="screen_change_account_provider_matrix_org_subtitle">"chatnit.com es un servidor grande y gratuito en la red pública Matrix para una comunicación segura y descentralizada, administrado por la Fundación Aless Microsystems."</string>
   <string name="screen_change_account_provider_other">"Otro"</string>
   <string name="screen_change_account_provider_subtitle">"Usa un proveedor de cuentas diferente, como tu propio servidor privado o una cuenta de trabajo."</string>
   <string name="screen_change_account_provider_title">"Cambiar proveedor de cuentas"</string>

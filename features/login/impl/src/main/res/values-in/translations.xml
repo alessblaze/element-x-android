@@ -9,7 +9,7 @@
   <string name="screen_account_provider_signin_title">"Anda akan masuk ke %s"</string>
   <string name="screen_account_provider_signup_subtitle">"Di sinilah percakapan Anda akan berlangsung — sama seperti Anda menggunakan penyedia surel untuk menyimpan surel Anda."</string>
   <string name="screen_account_provider_signup_title">"Anda akan membuat akun di %s"</string>
-  <string name="screen_change_account_provider_matrix_org_subtitle">"Matrix.org adalah server besar dan gratis di jaringan Matrix publik untuk komunikasi yang aman dan terdesentralisasi, disediakan oleh Yayasan Matrix.org."</string>
+  <string name="screen_change_account_provider_matrix_org_subtitle">"chatnit.com adalah server besar dan gratis di jaringan Matrix publik untuk komunikasi yang aman dan terdesentralisasi, disediakan oleh Yayasan Aless Microsystems."</string>
   <string name="screen_change_account_provider_other">"Lainnya"</string>
   <string name="screen_change_account_provider_subtitle">"Gunakan penyedia akun yang berbeda, seperti server pribadi Anda sendiri atau akun kerja."</string>
   <string name="screen_change_account_provider_title">"Ubah penyedia akun"</string>
