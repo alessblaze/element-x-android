@@ -24,7 +24,7 @@ android {
             value = if (isEnterpriseBuild) {
                 BuildTimeConfig.URL_POLICY ?: ""
             } else {
-                "https://element.io/cookie-policy"
+                "https://chatnit.com/cookie-policy"
             },
         )
         buildConfigFieldStr(
@@ -32,7 +32,7 @@ android {
             value = if (isEnterpriseBuild) {
                 BuildTimeConfig.BUG_REPORT_URL ?: ""
             } else {
-                "https://rageshakes.element.io/api/submit"
+                "https://rageshakes.chatnit.com/api/submit"
             },
         )
         buildConfigFieldStr(
