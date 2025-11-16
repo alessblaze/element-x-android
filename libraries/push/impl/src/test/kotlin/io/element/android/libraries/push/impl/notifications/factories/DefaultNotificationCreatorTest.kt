@@ -23,7 +23,8 @@ import io.element.android.libraries.matrix.test.A_SESSION_ID
 import io.element.android.libraries.matrix.test.A_THREAD_ID
 import io.element.android.libraries.matrix.test.core.aBuildMeta
 import io.element.android.libraries.matrix.ui.components.aMatrixUser
-import io.element.android.libraries.matrix.ui.test.media.FakeImageLoader
+import io.element.android.libraries.matrix.ui.media.test.FakeImageLoader
+import io.element.android.libraries.matrix.ui.media.test.FakeInitialsAvatarBitmapGenerator
 import io.element.android.libraries.push.api.notifications.NotificationBitmapLoader
 import io.element.android.libraries.push.impl.notifications.DefaultNotificationBitmapLoader
 import io.element.android.libraries.push.impl.notifications.NotificationActionIds
@@ -59,6 +60,21 @@ class DefaultNotificationCreatorTest {
         result.commonAssertions(
             expectedGroup = null,
             expectedCategory = NotificationCompat.CATEGORY_STATUS,
+        )
+    }
+
+    @Test
+    fun `test createUnregistrationNotification`() {
+        val sut = createNotificationCreator()
+        val matrixUser = aMatrixUser()
+        val result = sut.createUnregistrationNotification(
+            notificationAccountParams = aNotificationAccountParams(
+                user = matrixUser,
+            ),
+        )
+        result.commonAssertions(
+            expectedGroup = matrixUser.userId.value,
+            expectedCategory = NotificationCompat.CATEGORY_ERROR,
         )
     }
 
@@ -297,7 +313,11 @@ fun createNotificationCreator(
     context: Context = RuntimeEnvironment.getApplication(),
     buildMeta: BuildMeta = aBuildMeta(),
     notificationChannels: NotificationChannels = createNotificationChannels(),
-    bitmapLoader: NotificationBitmapLoader = DefaultNotificationBitmapLoader(context, FakeBuildVersionSdkIntProvider(Build.VERSION_CODES.R)),
+    bitmapLoader: NotificationBitmapLoader = DefaultNotificationBitmapLoader(
+        context = context,
+        sdkIntProvider = FakeBuildVersionSdkIntProvider(Build.VERSION_CODES.R),
+        initialsAvatarBitmapGenerator = FakeInitialsAvatarBitmapGenerator(),
+    ),
 ): NotificationCreator {
     return DefaultNotificationCreator(
         context = context,
