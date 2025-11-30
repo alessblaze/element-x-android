@@ -32,6 +32,8 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.graphics.Color
+import io.element.android.compound.theme.ElementTheme.isLightTheme
 import io.element.android.features.call.impl.R
 import io.element.android.features.call.impl.pip.PictureInPictureEvents
 import io.element.android.features.call.impl.pip.PictureInPictureState
@@ -49,6 +51,20 @@ import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.ui.strings.CommonStrings
 import timber.log.Timber
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.unit.dp
+import androidx.core.graphics.createBitmap
+import kotlinx.coroutines.delay
+
 
 typealias RequestPermissionCallback = (Array<String>) -> Unit
 
@@ -74,6 +90,7 @@ internal fun CallScreenView(
 
     Scaffold(
         modifier = modifier,
+        containerColor = if (isLightTheme) Color(0xffc8abe0) else Color(0xff210538),
     ) { padding ->
         BackHandler {
             handleBack()
@@ -141,8 +158,14 @@ internal fun CallScreenView(
             )
             when (state.urlState) {
                 AsyncData.Uninitialized,
-                is AsyncData.Loading ->
-                    ProgressDialog(text = stringResource(id = CommonStrings.common_please_wait))
+                is AsyncData.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        LoadingWaveform()
+                    }
+                }
                 is AsyncData.Failure -> {
                     Timber.e(state.urlState.error, "WebView failed to load URL: ${state.urlState.error.message}")
                     ErrorDialog(
@@ -243,6 +266,9 @@ private fun WebView.setup(
             onConsoleMessage(consoleMessage)
             return true
         }
+        override fun getDefaultVideoPoster(): android.graphics.Bitmap {
+            return createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888)
+        }
     }
 }
 
@@ -255,6 +281,48 @@ private fun WebView.addBackHandler(onBackPressed: () -> Unit) {
         },
         "backHandler"
     )
+}
+
+@Composable
+private fun LoadingWaveform() {
+    val barCount = 50
+    // Initialize with random heights instead of all 30f
+    var heights by remember {
+        mutableStateOf(List(barCount) {
+            kotlin.random.Random.nextFloat() * 80f + 10f  // Random between 10-90
+        })
+    }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(50)
+            heights = heights.drop(1) + listOf(
+                (heights.lastOrNull() ?: 30f).let { last ->
+                    val change = (kotlin.random.Random.nextFloat() - 0.5f) * 30
+                    (last + change).coerceIn(10f, 90f)
+                }
+            )
+        }
+    }
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.height(100.dp)
+    ) {
+        heights.forEachIndexed { index, height ->
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .fillMaxHeight(height / 100f)
+                    .background(
+                        color = if (isLightTheme) Color(0xff6f3e99) else Color(0xffc8abe0),
+                        shape = RoundedCornerShape(2.dp)
+                    )
+                    .alpha(if (index < 10) index / 10f else 1f)
+            )
+        }
+    }
 }
 
 @PreviewsDayNight

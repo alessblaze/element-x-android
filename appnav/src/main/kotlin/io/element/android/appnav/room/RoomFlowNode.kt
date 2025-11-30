@@ -48,6 +48,10 @@ import io.element.android.libraries.matrix.api.room.CurrentUserMembership
 import io.element.android.libraries.matrix.api.room.RoomMembershipObserver
 import io.element.android.libraries.matrix.api.room.alias.ResolvedRoomAlias
 import io.element.android.libraries.matrix.ui.room.LoadingRoomState
+import io.element.android.services.analytics.api.AnalyticsLongRunningTransaction.LoadJoinedRoomFlow
+import io.element.android.services.analytics.api.AnalyticsLongRunningTransaction.NotificationTapOpensTimeline
+import io.element.android.services.analytics.api.AnalyticsLongRunningTransaction.OpenRoom
+import io.element.android.services.analytics.api.AnalyticsService
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -70,6 +74,7 @@ class RoomFlowNode(
     private val joinRoomEntryPoint: JoinRoomEntryPoint,
     private val roomAliasResolverEntryPoint: RoomAliasResolverEntryPoint,
     private val membershipObserver: RoomMembershipObserver,
+    private val analyticsService: AnalyticsService,
 ) : BaseFlowNode<RoomFlowNode.NavTarget>(
     backstack = BackStack(
         initialElement = NavTarget.Loading,
@@ -108,6 +113,9 @@ class RoomFlowNode(
 
     override fun onBuilt() {
         super.onBuilt()
+        val parentTransaction = analyticsService.getLongRunningTransaction(NotificationTapOpensTimeline)
+        val openRoomTransaction = analyticsService.startLongRunningTransaction(OpenRoom, parentTransaction)
+        analyticsService.startLongRunningTransaction(LoadJoinedRoomFlow, openRoomTransaction)
         resolveRoomId()
     }
 

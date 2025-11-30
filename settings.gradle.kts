@@ -12,6 +12,7 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
+        mavenLocal()
     }
 }
 dependencyResolutionManagement {
@@ -25,6 +26,7 @@ dependencyResolutionManagement {
         }
         google()
         mavenCentral()
+        mavenLocal()
         maven {
             url = uri("https://repo1.maven.org/maven2/")
         }

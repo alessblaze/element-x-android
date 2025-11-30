@@ -20,6 +20,7 @@ import io.element.android.libraries.core.meta.BuildMeta
 import io.element.android.libraries.core.meta.BuildType
 import io.element.android.libraries.di.annotations.ApplicationContext
 import io.element.android.services.analyticsproviders.api.AnalyticsProvider
+import io.element.android.services.analyticsproviders.api.AnalyticsTransaction
 import io.element.android.services.analyticsproviders.sentry.log.analyticsTag
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -51,6 +52,7 @@ class SentryAnalyticsProvider(
             options.isEnableUserInteractionTracing = true
             options.environment = buildMeta.buildType.toSentryEnv()
         }
+        Timber.tag(analyticsTag.value).d("Sentry was initialized correctly")
     }
 
     override fun stop() {
@@ -87,10 +89,14 @@ class SentryAnalyticsProvider(
     override fun trackError(throwable: Throwable) {
         Sentry.captureException(throwable)
     }
+
+    override fun startTransaction(name: String, operation: String?): AnalyticsTransaction? {
+        return SentryAnalyticsTransaction(name, operation)
+    }
 }
 
 private fun BuildType.toSentryEnv() = when (this) {
     BuildType.RELEASE -> SentryConfig.ENV_RELEASE
-    BuildType.NIGHTLY,
+    BuildType.NIGHTLY -> SentryConfig.ENV_NIGHTLY
     BuildType.DEBUG -> SentryConfig.ENV_DEBUG
 }
