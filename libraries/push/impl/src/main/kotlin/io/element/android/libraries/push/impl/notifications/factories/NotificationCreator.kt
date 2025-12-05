@@ -143,7 +143,7 @@ class DefaultNotificationCreator(
             else -> pendingIntentFactory.createOpenRoomPendingIntent(
                 sessionId = roomInfo.sessionId,
                 roomId = roomInfo.roomId,
-                eventId = eventId,
+                eventId = null, // This is null because eventid is null most of times so tapping from notif has issue.
                 extras = bundleOf(ROOM_OPENED_FROM_NOTIFICATION to true),
             )
         }
