@@ -116,7 +116,7 @@ android {
                 "login_redirect_scheme",
                 "$oidcRedirectSchemeBase.debug",
             )
-            applicationIdSuffix = ".debug"
+            //applicationIdSuffix = ".debug"
             signingConfig = signingConfigs.getByName("debug")
         }
 

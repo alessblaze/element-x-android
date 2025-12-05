@@ -24,6 +24,6 @@ object OidcConfig {
 
     // Some homeservers/auth issuers don't support dynamic client registration, and have to be registered manually
     val STATIC_REGISTRATIONS = mapOf(
-        "https://id.thirdroom.io/realms/thirdroom" to "elementx",
+        "https://id.thirdroom.io/realms/thirdroom" to "chatnit",
     )
 }
