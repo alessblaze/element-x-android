@@ -14,7 +14,7 @@ import com.google.common.truth.Truth.assertThat
 import io.element.android.features.call.api.CallType
 import io.element.android.features.call.impl.DefaultElementCallEntryPoint
 import io.element.android.features.call.impl.notifications.CallNotificationData
-import io.element.android.features.call.impl.ui.ElementCallActivity
+import io.element.android.features.call.impl.ui.ChatNitCallActivity
 import io.element.android.features.call.utils.FakeActiveCallManager
 import io.element.android.libraries.matrix.test.AN_EVENT_ID
 import io.element.android.libraries.matrix.test.A_ROOM_ID
@@ -35,11 +35,11 @@ import kotlin.time.Duration.Companion.seconds
 @RunWith(RobolectricTestRunner::class)
 class DefaultElementCallEntryPointTest {
     @Test
-    fun `startCall - starts ElementCallActivity setup with the needed extras`() = runTest {
+    fun `startCall - starts ChatNitCallActivity setup with the needed extras`() = runTest {
         val entryPoint = createEntryPoint()
         entryPoint.startCall(CallType.RoomCall(A_SESSION_ID, A_ROOM_ID))
 
-        val expectedIntent = Intent(InstrumentationRegistry.getInstrumentation().targetContext, ElementCallActivity::class.java)
+        val expectedIntent = Intent(InstrumentationRegistry.getInstrumentation().targetContext, ChatNitCallActivity::class.java)
         val intent = shadowOf(RuntimeEnvironment.getApplication()).nextStartedActivity
         assertThat(intent.component).isEqualTo(expectedIntent.component)
         assertThat(intent.extras?.containsKey("EXTRA_CALL_TYPE")).isTrue()

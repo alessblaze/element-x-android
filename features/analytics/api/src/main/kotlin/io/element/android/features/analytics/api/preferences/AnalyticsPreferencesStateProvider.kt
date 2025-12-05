@@ -19,9 +19,9 @@ open class AnalyticsPreferencesStateProvider : PreviewParameterProvider<Analytic
 }
 
 fun aAnalyticsPreferencesState(
-    applicationName: String = "Element X",
+    applicationName: String = "ChatNit",
     isEnabled: Boolean = false,
-    policyUrl: String = "https://element.io",
+    policyUrl: String = "https://chatnit.com",
 ) = AnalyticsPreferencesState(
     applicationName = applicationName,
     isEnabled = isEnabled,

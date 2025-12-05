@@ -34,7 +34,7 @@ class WebViewWidgetMessageInterceptor(
         // We call both the WebMessageListener and the JavascriptInterface objects in JS with this
         // 'listenerName' so they can both receive the data from the WebView when
         // `${LISTENER_NAME}.postMessage(...)` is called
-        const val LISTENER_NAME = "elementX"
+        const val LISTENER_NAME = "chatnit"
     }
 
     // It's important to have extra capacity here to make sure we don't drop any messages

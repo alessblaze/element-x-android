@@ -14,10 +14,10 @@ import android.content.Intent
 import androidx.core.app.PendingIntentCompat
 import io.element.android.features.call.api.CallType
 import io.element.android.features.call.impl.DefaultElementCallEntryPoint
-import io.element.android.features.call.impl.ui.ElementCallActivity
+import io.element.android.features.call.impl.ui.ChatNitCallActivity
 
 internal object IntentProvider {
-    fun createIntent(context: Context, callType: CallType): Intent = Intent(context, ElementCallActivity::class.java).apply {
+    fun createIntent(context: Context, callType: CallType): Intent = Intent(context, ChatNitCallActivity::class.java).apply {
         putExtra(DefaultElementCallEntryPoint.EXTRA_CALL_TYPE, callType)
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
     }

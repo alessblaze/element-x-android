@@ -23,7 +23,7 @@ import androidx.core.app.PendingIntentCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import io.element.android.features.call.impl.R
-import io.element.android.features.call.impl.ui.ElementCallActivity
+import io.element.android.features.call.impl.ui.ChatNitCallActivity
 import io.element.android.libraries.core.extensions.runCatchingExceptions
 import io.element.android.libraries.designsystem.utils.CommonDrawables
 import io.element.android.libraries.push.api.notifications.ForegroundServiceType
@@ -65,7 +65,7 @@ class CallForegroundService : Service() {
         ).build()
         notificationManagerCompat.createNotificationChannel(foregroundServiceChannel)
 
-        val callActivityIntent = Intent(this, ElementCallActivity::class.java)
+        val callActivityIntent = Intent(this, ChatNitCallActivity::class.java)
         val pendingIntent = PendingIntentCompat.getActivity(this, 0, callActivityIntent, 0, false)
         val notification = NotificationCompat.Builder(this, foregroundServiceChannel.id)
             .setSmallIcon(CommonDrawables.ic_notification)

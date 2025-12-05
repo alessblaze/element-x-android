@@ -20,7 +20,7 @@ import io.element.android.x.initializer.CacheCleanerInitializer
 import io.element.android.x.initializer.CrashInitializer
 import io.element.android.x.initializer.PlatformInitializer
 
-class ElementXApplication : Application(), DependencyInjectionGraphOwner, Configuration.Provider {
+class ChatNitApplication : Application(), DependencyInjectionGraphOwner, Configuration.Provider {
     override val graph: AppGraph = createGraphFactory<AppGraph.Factory>().create(this)
 
     override val workManagerConfiguration: Configuration = Configuration.Builder()

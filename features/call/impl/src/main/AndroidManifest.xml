@@ -28,13 +28,13 @@
 
     <application>
         <activity
-            android:name=".ui.ElementCallActivity"
+            android:name=".ui.ChatNitCallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden|keyboard|navigation|uiMode"
             android:exported="true"
             android:label="@string/element_call"
             android:launchMode="singleTask"
             android:supportsPictureInPicture="true"
-            android:taskAffinity="io.element.android.features.call">
+            android:taskAffinity="com.ams.chatnit.features.call">
 
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -75,7 +75,7 @@
             android:excludeFromRecents="true"
             android:exported="false"
             android:launchMode="singleTask"
-            android:taskAffinity="io.element.android.features.call" />
+            android:taskAffinity="com.ams.chatnit.features.call" />
 
         <service
             android:name=".services.CallForegroundService"

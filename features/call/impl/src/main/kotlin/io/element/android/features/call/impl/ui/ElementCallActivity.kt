@@ -57,9 +57,9 @@ import io.element.android.libraries.designsystem.theme.ElementThemeApp
 import io.element.android.libraries.preferences.api.store.AppPreferencesStore
 import timber.log.Timber
 
-private val loggerTag = LoggerTag("ElementCallActivity")
+private val loggerTag = LoggerTag("ChatNitCallActivity")
 
-class ElementCallActivity :
+class ChatNitCallActivity :
     AppCompatActivity(),
     CallScreenNavigator,
     PipView {
@@ -104,7 +104,7 @@ class ElementCallActivity :
 
         pictureInPicturePresenter.setPipView(this)
 
-        Timber.d("Created ElementCallActivity with call type: ${webViewTarget.value}")
+        Timber.d("Created ChatNitCallActivity with call type: ${webViewTarget.value}")
 
         setContent {
             val pipState = pictureInPicturePresenter.present()

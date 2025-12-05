@@ -11,12 +11,12 @@ package io.element.android.features.call.impl.di
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
 import io.element.android.features.call.impl.receivers.DeclineCallBroadcastReceiver
-import io.element.android.features.call.impl.ui.ElementCallActivity
+import io.element.android.features.call.impl.ui.ChatNitCallActivity
 import io.element.android.features.call.impl.ui.IncomingCallActivity
 
 @ContributesTo(AppScope::class)
 interface CallBindings {
-    fun inject(callActivity: ElementCallActivity)
+    fun inject(callActivity: ChatNitCallActivity)
     fun inject(callActivity: IncomingCallActivity)
     fun inject(declineCallBroadcastReceiver: DeclineCallBroadcastReceiver)
 }
