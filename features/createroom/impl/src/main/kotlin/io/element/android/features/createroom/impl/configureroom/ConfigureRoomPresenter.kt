@@ -19,7 +19,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.net.toUri
-import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.AssistedInject
 import im.vector.app.features.analytics.plan.CreatedRoom
 import io.element.android.libraries.architecture.AsyncAction
 import io.element.android.libraries.architecture.Presenter
@@ -49,8 +51,9 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.jvm.optionals.getOrDefault
 
-@Inject
+@AssistedInject
 class ConfigureRoomPresenter(
+    @Assisted private val isSpace: Boolean,
     private val dataStore: CreateRoomConfigStore,
     private val matrixClient: MatrixClient,
     private val mediaPickerProvider: PickerProvider,
@@ -61,13 +64,22 @@ class ConfigureRoomPresenter(
     private val roomAliasHelper: RoomAliasHelper,
     private val mediaOptimizationConfigProvider: MediaOptimizationConfigProvider,
 ) : Presenter<ConfigureRoomState> {
+    @AssistedFactory
+    interface Factory {
+        fun create(isSpace: Boolean): ConfigureRoomPresenter
+    }
+
     private val cameraPermissionPresenter: PermissionsPresenter = permissionsPresenterFactory.create(android.Manifest.permission.CAMERA)
     private var pendingPermissionRequest = false
+
+    init {
+        dataStore.setIsSpace(isSpace)
+    }
 
     @Composable
     override fun present(): ConfigureRoomState {
         val cameraPermissionState = cameraPermissionPresenter.present()
-        val createRoomConfig by dataStore.getCreateRoomConfigFlow().collectAsState(CreateRoomConfig())
+        val createRoomConfig by dataStore.getCreateRoomConfigFlow().collectAsState()
         val homeserverName = remember { matrixClient.userIdServerName() }
         val isKnockFeatureEnabled by remember {
             featureFlagService.isFeatureEnabledFlow(FeatureFlags.Knock)
@@ -112,6 +124,14 @@ class ConfigureRoomPresenter(
         val localCoroutineScope = rememberCoroutineScope()
         val createRoomAction: MutableState<AsyncAction<RoomId>> = remember { mutableStateOf(AsyncAction.Uninitialized) }
 
+        val availableVisibilityOptions = remember(isSpace, isKnockFeatureEnabled) {
+            listOfNotNull(
+                RoomVisibilityItem.Public,
+                RoomVisibilityItem.AskToJoin.takeIf { !isSpace && isKnockFeatureEnabled },
+                RoomVisibilityItem.Private,
+            ).toImmutableList()
+        }
+
         fun createRoom(config: CreateRoomConfig) {
             createRoomAction.value = AsyncAction.Uninitialized
             localCoroutineScope.createRoom(config, createRoomAction)
@@ -143,13 +163,13 @@ class ConfigureRoomPresenter(
         }
 
         return ConfigureRoomState(
-            isKnockFeatureEnabled = isKnockFeatureEnabled,
             config = createRoomConfig,
             avatarActions = avatarActions,
             createRoomAction = createRoomAction.value,
             cameraPermissionState = cameraPermissionState,
             homeserverName = homeserverName,
             roomAddressValidity = roomAddressValidity.value,
+            availableVisibilityOptions = availableVisibilityOptions,
             eventSink = ::handleEvent,
         )
     }
@@ -171,7 +191,8 @@ class ConfigureRoomPresenter(
                     preset = RoomPreset.PUBLIC_CHAT,
                     invite = config.invites.map { it.userId },
                     avatar = avatarUrl,
-                    roomAliasName = config.roomVisibility.roomAddress()
+                    roomAliasName = config.roomVisibility.roomAddress(),
+                    isSpace = isSpace,
                 )
             } else {
                 CreateRoomParameters(
@@ -184,6 +205,7 @@ class ConfigureRoomPresenter(
                     preset = RoomPreset.PRIVATE_CHAT,
                     invite = config.invites.map { it.userId },
                     avatar = avatarUrl,
+                    isSpace = isSpace,
                 )
             }
             matrixClient.createRoom(params)

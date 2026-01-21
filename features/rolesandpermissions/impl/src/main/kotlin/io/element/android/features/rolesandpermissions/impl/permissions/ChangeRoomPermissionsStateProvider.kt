@@ -19,6 +19,7 @@ class ChangeRoomPermissionsStateProvider : PreviewParameterProvider<ChangeRoomPe
     override val values: Sequence<ChangeRoomPermissionsState>
         get() = sequenceOf(
             aChangeRoomPermissionsState(),
+            aChangeRoomPermissionsState(ownPowerLevel = RoomMember.Role.Moderator.powerLevel),
             aChangeRoomPermissionsState(hasChanges = true),
             aChangeRoomPermissionsState(hasChanges = true, saveAction = AsyncAction.Loading),
             aChangeRoomPermissionsState(
@@ -26,16 +27,19 @@ class ChangeRoomPermissionsStateProvider : PreviewParameterProvider<ChangeRoomPe
                 saveAction = AsyncAction.Failure(IllegalStateException("Failed to save changes"))
             ),
             aChangeRoomPermissionsState(hasChanges = true, saveAction = AsyncAction.ConfirmingCancellation),
+            aChangeRoomPermissionsState(itemsBySection = ChangeRoomPermissionsPresenter.buildItems(isSpace = true)),
         )
 }
 
 internal fun aChangeRoomPermissionsState(
+    ownPowerLevel: Long = RoomMember.Role.Admin.powerLevel,
     currentPermissions: RoomPowerLevelsValues = previewPermissions(),
     itemsBySection: Map<RoomPermissionsSection, ImmutableList<RoomPermissionType>> = ChangeRoomPermissionsPresenter.buildItems(false),
     hasChanges: Boolean = false,
     saveAction: AsyncAction<Boolean> = AsyncAction.Uninitialized,
     eventSink: (ChangeRoomPermissionsEvent) -> Unit = {},
 ) = ChangeRoomPermissionsState(
+    ownPowerLevel = ownPowerLevel,
     currentPermissions = currentPermissions,
     itemsBySection = itemsBySection.toImmutableMap(),
     hasChanges = hasChanges,
@@ -51,12 +55,13 @@ private fun previewPermissions(): RoomPowerLevelsValues {
         ban = RoomMember.Role.User.powerLevel,
         // MessagesAndContent section
         redactEvents = RoomMember.Role.Moderator.powerLevel,
-        sendEvents = RoomMember.Role.Admin.powerLevel,
+        eventsDefault = RoomMember.Role.Admin.powerLevel,
         // RoomDetails section
         roomName = RoomMember.Role.Admin.powerLevel,
         roomAvatar = RoomMember.Role.Moderator.powerLevel,
         roomTopic = RoomMember.Role.User.powerLevel,
         // SpaceManagement section
         spaceChild = RoomMember.Role.Moderator.powerLevel,
+        stateDefault = RoomMember.Role.Moderator.powerLevel,
     )
 }

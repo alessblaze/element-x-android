@@ -14,6 +14,7 @@ import io.element.android.libraries.matrix.api.core.SessionId
 import io.element.android.libraries.matrix.api.core.ThreadId
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.room.draft.ComposerDraft
+import io.element.android.libraries.matrix.api.room.powerlevels.RoomPermissions
 import io.element.android.libraries.matrix.api.room.powerlevels.RoomPowerLevelsValues
 import io.element.android.libraries.matrix.api.room.tombstone.PredecessorRoom
 import io.element.android.libraries.matrix.api.roomdirectory.RoomVisibility
@@ -85,6 +86,13 @@ interface BaseRoom : Closeable {
     suspend fun getUpdatedMember(userId: UserId): Result<RoomMember>
 
     /**
+     * Gets the direct room member, if any.
+     * This is a convenience method for getting the other member in a direct message room.
+     * Returns null if the room is not a dm or if the member cannot be found.
+     */
+    suspend fun getDirectRoomMember(): RoomMember?
+
+    /**
      * Adds the room to the sync subscription list.
      */
     suspend fun subscribeToSync()
@@ -98,6 +106,11 @@ interface BaseRoom : Closeable {
      * Gets the role of the user with the provided [userId] in the room.
      */
     suspend fun userRole(userId: UserId): Result<RoomMember.Role>
+
+    /**
+     * Gets the permissions of the room.
+     */
+    suspend fun roomPermissions(): Result<RoomPermissions>
 
     /**
      * Gets the display name of the user with the provided [userId] in the room.
@@ -123,57 +136,6 @@ interface BaseRoom : Closeable {
      * Forgets about the room, removing it from the server and the local cache. Only left and banned rooms can be forgotten.
      */
     suspend fun forget(): Result<Unit>
-
-    /**
-     * Returns `true` if the user with the provided [userId] can invite other users to the room.
-     */
-    suspend fun canUserInvite(userId: UserId): Result<Boolean>
-
-    /**
-     * Returns `true` if the user with the provided [userId] can kick other users from the room.
-     */
-    suspend fun canUserKick(userId: UserId): Result<Boolean>
-
-    /**
-     * Returns `true` if the user with the provided [userId] can ban other users from the room.
-     */
-    suspend fun canUserBan(userId: UserId): Result<Boolean>
-
-    /**
-     * Returns `true` if the user with the provided [userId] can redact their own messages.
-     */
-    suspend fun canUserRedactOwn(userId: UserId): Result<Boolean>
-
-    /**
-     * Returns `true` if the user with the provided [userId] can redact messages from other users.
-     */
-    suspend fun canUserRedactOther(userId: UserId): Result<Boolean>
-
-    /**
-     * Returns `true` if the user with the provided [userId] can send state events.
-     */
-    suspend fun canUserSendState(userId: UserId, type: StateEventType): Result<Boolean>
-
-    /**
-     * Returns `true` if the user with the provided [userId] can send messages.
-     */
-    suspend fun canUserSendMessage(userId: UserId, type: MessageEventType): Result<Boolean>
-
-    /**
-     * Returns `true` if the user with the provided [userId] can trigger an `@room` notification.
-     */
-    suspend fun canUserTriggerRoomNotification(userId: UserId): Result<Boolean>
-
-    /**
-     * Returns `true` if the user with the provided [userId] can pin or unpin messages.
-     */
-    suspend fun canUserPinUnpin(userId: UserId): Result<Boolean>
-
-    /**
-     * Returns `true` if the user with the provided [userId] can join or starts calls.
-     */
-    suspend fun canUserJoinCall(userId: UserId): Result<Boolean> =
-        canUserSendState(userId, StateEventType.CALL_MEMBER)
 
     /**
      * Sets the room as favorite or not, based on the [isFavorite] parameter.

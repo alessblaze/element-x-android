@@ -81,9 +81,9 @@ class RustMatrixClientFactory(
         client.setMediaRetentionPolicy(
             MediaRetentionPolicy(
                 // Make this 500MB instead of 400MB
-                maxCacheSize = 500.megaBytes.to(ByteUnit.BYTES).toULong(),
+                maxCacheSize = 500.megaBytes.into(ByteUnit.BYTES).toULong(),
                 // This is the default value, but let's make it explicit
-                maxFileSize = 20.megaBytes.to(ByteUnit.BYTES).toULong(),
+                maxFileSize = 20.megaBytes.into(ByteUnit.BYTES).toULong(),
                 // Use 30 days instead of 60
                 lastAccessExpiry = 30.days.toJavaDuration(),
                 // This is the default value, but let's make it explicit
@@ -193,7 +193,7 @@ sealed interface ClientBuilderSlidingSync {
     data object Native : ClientBuilderSlidingSync
 }
 
-private fun SessionData.toSession() = Session(
+fun SessionData.toSession() = Session(
     accessToken = accessToken,
     refreshToken = refreshToken,
     userId = userId,

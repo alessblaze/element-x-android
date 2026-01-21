@@ -78,6 +78,18 @@ open class ConfigureRoomStateProvider : PreviewParameterProvider<ConfigureRoomSt
                 ),
                 roomAddressValidity = RoomAddressValidity.Valid,
             ),
+            aConfigureRoomState(
+                config = CreateRoomConfig(
+                    isSpace = true,
+                    roomName = "Space 101",
+                    topic = "Space topic for this space when the text goes onto multiple lines and is really long, there shouldn’t be more than 3 lines",
+                    roomVisibility = RoomVisibilityState.Public(
+                        roomAddress = RoomAddress.AutoFilled("Space-101"),
+                        roomAccess = RoomAccess.Anyone,
+                    ),
+                ),
+                roomAddressValidity = RoomAddressValidity.Valid,
+            ),
         )
 }
 
@@ -89,14 +101,17 @@ fun aConfigureRoomState(
     cameraPermissionState: PermissionsState = aPermissionsState(showDialog = false),
     homeserverName: String = "matrix.org",
     roomAddressValidity: RoomAddressValidity = RoomAddressValidity.Valid,
+    availableVisibilityOptions: List<RoomVisibilityItem> = RoomVisibilityItem.entries.filter {
+        if (!isKnockFeatureEnabled) it != RoomVisibilityItem.AskToJoin else true
+    },
     eventSink: (ConfigureRoomEvents) -> Unit = { },
 ) = ConfigureRoomState(
     config = config,
-    isKnockFeatureEnabled = isKnockFeatureEnabled,
     avatarActions = avatarActions.toImmutableList(),
     createRoomAction = createRoomAction,
     cameraPermissionState = cameraPermissionState,
     homeserverName = homeserverName,
     roomAddressValidity = roomAddressValidity,
+    availableVisibilityOptions = availableVisibilityOptions.toImmutableList(),
     eventSink = eventSink,
 )

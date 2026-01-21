@@ -2,6 +2,7 @@ import config.BuildTimeConfig
 import extension.buildConfigFieldStr
 import extension.readLocalProperty
 import extension.setupDependencyInjection
+import extension.testCommonDependencies
 
 /*
  * Copyright (c) 2025 Element Creations Ltd.
@@ -51,5 +52,11 @@ dependencies {
     implementation(libs.sentry)
     implementation(projects.libraries.core)
     implementation(projects.libraries.di)
+    implementation(projects.libraries.matrix.api)
     implementation(projects.services.analyticsproviders.api)
+    implementation(projects.services.appnavstate.api)
+
+    testCommonDependencies(libs, false)
+    testImplementation(projects.libraries.matrix.test)
+    testImplementation(projects.services.appnavstate.test)
 }

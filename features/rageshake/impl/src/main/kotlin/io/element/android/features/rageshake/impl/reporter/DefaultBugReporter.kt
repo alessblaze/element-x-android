@@ -147,17 +147,23 @@ class DefaultBugReporter(
                     }
                 }
                 val gzippedFiles = mutableListOf<File>()
+                var filesTooBig = 0
                 if (withDevicesLogs) {
                     val files = getLogFiles().sortedByDescending { it.lastModified() }
-                    files.mapNotNullTo(gzippedFiles) { file ->
+                    val filesBySize = files.groupBy {
+                        it.length() < RageshakeConfig.MAX_LOG_CONTENT_SIZE
+                    }
+                    filesBySize[true].orEmpty().mapNotNullTo(gzippedFiles) { file ->
                         when {
                             file.extension == "gz" -> file
                             else -> compressFile(file)
                         }
                     }
+                    filesTooBig = filesBySize[false].orEmpty().size
                 }
                 if (withCrashLogs || withDevicesLogs) {
                     saveLogCat()
+                        ?.takeIf { it.length() < RageshakeConfig.MAX_LOG_CONTENT_SIZE }
                         ?.let { logCatFile ->
                             compressFile(logCatFile).also {
                                 logCatFile.safeDelete()
@@ -191,6 +197,9 @@ class DefaultBugReporter(
                     .addFormDataPart("label", buildMeta.versionName)
                     .addFormDataPart("label", buildMeta.flavorDescription)
                     .addFormDataPart("branch_name", buildMeta.gitBranchName)
+                if (filesTooBig > 0) {
+                    builder.addFormDataPart("omitted_logs", filesTooBig.toString())
+                }
                 userId?.let {
                     matrixClientProvider.getOrNull(it)?.let { client ->
                         val curveKey = client.encryptionService.deviceCurve25519()
@@ -390,7 +399,10 @@ class DefaultBugReporter(
         ) {
             val logDirectory = logDirectory()
             logDirectory.listFiles()
-                ?.filter { it.isFile && !it.name.endsWith(LOG_CAT_FILENAME) }
+                ?.filter {
+                    it.isFile &&
+                        !it.name.endsWith(LOG_CAT_FILENAME)
+                }
         }.orEmpty()
     }
 

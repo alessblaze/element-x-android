@@ -18,6 +18,8 @@ data class HomeSpacesState(
     val spaceRooms: ImmutableList<SpaceRoom>,
     val seenSpaceInvites: ImmutableSet<RoomId>,
     val hideInvitesAvatar: Boolean,
+    val canCreateSpaces: Boolean,
+    val canExploreSpaces: Boolean,
     val eventSink: (HomeSpacesEvents) -> Unit,
 )
 

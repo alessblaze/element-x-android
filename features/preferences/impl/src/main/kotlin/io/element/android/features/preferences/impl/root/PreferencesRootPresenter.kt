@@ -69,6 +69,9 @@ class PreferencesRootPresenter(
         val isMultiAccountEnabled by remember {
             featureFlagService.isFeatureEnabledFlow(FeatureFlags.MultiAccount)
         }.collectAsState(initial = false)
+        val showLinkNewDevice by remember {
+            featureFlagService.isFeatureEnabledFlow(FeatureFlags.QrCodeLogin)
+        }.collectAsState(initial = false)
 
         val otherSessions by remember {
             sessionStore.sessionsFlow().map { list ->
@@ -136,7 +139,7 @@ class PreferencesRootPresenter(
 
         return PreferencesRootState(
             myUser = matrixUser.value,
-            version = versionFormatter.get(),
+            version = remember { versionFormatter.get() },
             deviceId = matrixClient.deviceId,
             isMultiAccountEnabled = isMultiAccountEnabled,
             otherSessions = otherSessions,
@@ -146,6 +149,7 @@ class PreferencesRootPresenter(
             devicesManagementUrl = devicesManagementUrl.value,
             showAnalyticsSettings = hasAnalyticsProviders,
             canReportBug = canReportBug,
+            showLinkNewDevice = showLinkNewDevice,
             showDeveloperSettings = showDeveloperSettings,
             canDeactivateAccount = canDeactivateAccount,
             showBlockedUsersItem = showBlockedUsersItem,

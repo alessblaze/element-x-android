@@ -34,12 +34,25 @@ data class EventTimelineItem(
     val timelineItemDebugInfoProvider: TimelineItemDebugInfoProvider,
     val messageShieldProvider: MessageShieldProvider,
     val sendHandleProvider: SendHandleProvider,
+    /**
+     * If the keys to this message were forwarded by another user via history sharing (MSC4268), the ID of that user.
+     * If this is set, then [messageShieldProvider] will also return [MessageShield.AuthenticityNotGuaranteed].
+     */
+    val forwarder: UserId?,
+    /** If [forwarder] is set, the profile of the forwarding user, if it was cached at the time this `EventTimelineItem` was created. */
+    val forwarderProfile: ProfileDetails?,
 ) {
     fun inReplyTo(): InReplyTo? {
         return (content as? MessageContent)?.inReplyTo
     }
 
-    fun threadInfo(): EventThreadInfo? = (content as? MessageContent)?.threadInfo
+    fun threadInfo(): EventThreadInfo? = when (content) {
+        is MessageContent -> content.threadInfo
+        is PollContent -> content.threadInfo
+        is StickerContent -> content.threadInfo
+        is UnableToDecryptContent -> content.threadInfo
+        else -> null
+    }
 
     fun hasNotLoadedInReplyTo(): Boolean {
         val details = inReplyTo()

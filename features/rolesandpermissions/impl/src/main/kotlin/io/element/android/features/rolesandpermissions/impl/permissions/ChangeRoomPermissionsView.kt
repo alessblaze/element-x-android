@@ -30,7 +30,6 @@ import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.TextButton
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.ui.strings.CommonStrings
-import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,7 +73,8 @@ fun ChangeRoomPermissionsView(
                         PreferenceDropdown(
                             title = titleForType(permissionType),
                             selectedOption = state.selectedRoleForType(permissionType),
-                            options = SelectableRole.entries.toImmutableList(),
+                            options = state.selectableRoles,
+                            enabled = state.canChangePermission(permissionType),
                             onSelectOption = { role ->
                                 state.eventSink(
                                     ChangeRoomPermissionsEvent.ChangeMinimumRoleForAction(
@@ -110,10 +110,10 @@ fun ChangeRoomPermissionsView(
 
 @Composable
 private fun titleForSection(section: RoomPermissionsSection): String = when (section) {
-    RoomPermissionsSection.SpaceDetails -> stringResource(R.string.screen_room_roles_and_permissions_space_details)
-    RoomPermissionsSection.RoomDetails -> stringResource(R.string.screen_room_roles_and_permissions_room_details)
-    RoomPermissionsSection.MessagesAndContent -> stringResource(R.string.screen_room_roles_and_permissions_messages_and_content)
-    RoomPermissionsSection.MembershipModeration -> stringResource(R.string.screen_room_roles_and_permissions_member_moderation)
+    RoomPermissionsSection.EditDetails -> stringResource(R.string.screen_room_change_permissions_room_details)
+    RoomPermissionsSection.MessagesAndContent -> stringResource(R.string.screen_room_change_permissions_messages_and_content)
+    RoomPermissionsSection.ManageMembers -> stringResource(R.string.screen_room_change_permissions_member_moderation)
+    RoomPermissionsSection.ManageSpace -> stringResource(R.string.screen_room_change_permissions_manage_space)
 }
 
 @Composable
@@ -126,6 +126,7 @@ private fun titleForType(type: RoomPermissionType): String = when (type) {
     RoomPermissionType.ROOM_NAME -> stringResource(R.string.screen_room_change_permissions_room_name)
     RoomPermissionType.ROOM_AVATAR -> stringResource(R.string.screen_room_change_permissions_room_avatar)
     RoomPermissionType.ROOM_TOPIC -> stringResource(R.string.screen_room_change_permissions_room_topic)
+    RoomPermissionType.SPACE_MANAGE_ROOMS -> stringResource(R.string.screen_room_change_permissions_manage_space_rooms)
 }
 
 @PreviewsDayNight

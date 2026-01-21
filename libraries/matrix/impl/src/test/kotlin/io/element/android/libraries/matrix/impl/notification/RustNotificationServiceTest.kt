@@ -12,7 +12,7 @@ import com.google.common.truth.Truth.assertThat
 import io.element.android.libraries.matrix.api.exception.NotificationResolverException
 import io.element.android.libraries.matrix.api.notification.NotificationContent
 import io.element.android.libraries.matrix.api.timeline.item.event.TextMessageType
-import io.element.android.libraries.matrix.impl.fixtures.factories.aRustBatchNotificationResult
+import io.element.android.libraries.matrix.impl.fixtures.factories.aRustBatchNotificationResultOk
 import io.element.android.libraries.matrix.impl.fixtures.factories.aRustNotificationEventTimeline
 import io.element.android.libraries.matrix.impl.fixtures.factories.aRustNotificationItem
 import io.element.android.libraries.matrix.impl.fixtures.fakes.FakeFfiNotificationClient
@@ -32,13 +32,13 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.matrix.rustcomponents.sdk.NotificationClient
 import org.matrix.rustcomponents.sdk.NotificationStatus
-import org.matrix.rustcomponents.sdk.TimelineEventType
+import org.matrix.rustcomponents.sdk.TimelineEventContent
 
 class RustNotificationServiceTest {
-        @Test
+    @Test
     fun test() = runTest {
         val notificationClient = FakeFfiNotificationClient(
-            notificationItemResult = mapOf(AN_EVENT_ID.value to aRustBatchNotificationResult()),
+            notificationItemResult = mapOf(AN_EVENT_ID.value to aRustBatchNotificationResultOk()),
         )
         val sut = createRustNotificationService(
             notificationClient = notificationClient,
@@ -56,20 +56,20 @@ class RustNotificationServiceTest {
         )
     }
 
-        @Test
+    @Test
     fun `test mapping invalid item only drops that item`() = runTest {
-        val error = IllegalStateException("This event type is not supported")
+        val error = IllegalStateException("This event content is not supported")
         val faultyEvent = object : FakeFfiTimelineEvent() {
-            override fun eventType(): TimelineEventType {
+            override fun content(): TimelineEventContent {
                 throw error
             }
         }
         val notificationClient = FakeFfiNotificationClient(
             notificationItemResult = mapOf(
-                AN_EVENT_ID.value to aRustBatchNotificationResult(
+                AN_EVENT_ID.value to aRustBatchNotificationResultOk(
                     notificationStatus = NotificationStatus.Event(aRustNotificationItem(aRustNotificationEventTimeline(faultyEvent)))
                 ),
-                AN_EVENT_ID_2.value to aRustBatchNotificationResult()
+                AN_EVENT_ID_2.value to aRustBatchNotificationResultOk()
             ),
         )
         val sut = createRustNotificationService(
@@ -83,7 +83,7 @@ class RustNotificationServiceTest {
         assertThat(successfulResult?.isSuccess).isTrue()
     }
 
-        @Test
+    @Test
     fun `test unable to resolve event`() = runTest {
         val notificationClient = FakeFfiNotificationClient(
             notificationItemResult = emptyMap(),
@@ -95,7 +95,7 @@ class RustNotificationServiceTest {
         assertThat(exception).isInstanceOf(NotificationResolverException::class.java)
     }
 
-        @Test
+    @Test
     fun `close should invoke the close method of the service`() = runTest {
         val closeResult = lambdaRecorder<Unit> { }
         val notificationClient = FakeFfiNotificationClient(

@@ -22,9 +22,6 @@ import io.element.android.features.rageshake.api.RageshakeFeatureAvailability
 import io.element.android.features.rageshake.test.logs.FakeAnnouncementService
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarDispatcher
-import io.element.android.libraries.featureflag.api.FeatureFlagService
-import io.element.android.libraries.featureflag.api.FeatureFlags
-import io.element.android.libraries.featureflag.test.FakeFeatureFlagService
 import io.element.android.libraries.indicator.api.IndicatorService
 import io.element.android.libraries.indicator.test.FakeIndicatorService
 import io.element.android.libraries.matrix.api.MatrixClient
@@ -35,7 +32,6 @@ import io.element.android.libraries.matrix.test.AN_EXCEPTION
 import io.element.android.libraries.matrix.test.A_USER_ID
 import io.element.android.libraries.matrix.test.A_USER_NAME
 import io.element.android.libraries.matrix.test.FakeMatrixClient
-import io.element.android.libraries.matrix.test.core.aBuildMeta
 import io.element.android.libraries.matrix.test.sync.FakeSyncService
 import io.element.android.libraries.sessionstorage.api.SessionStore
 import io.element.android.libraries.sessionstorage.test.InMemorySessionStore
@@ -53,8 +49,6 @@ import org.junit.Test
 class HomePresenterTest {
     @get:Rule
     val warmUpRule = WarmUpRule()
-
-    private val isSpaceEnabled = FeatureFlags.Space.defaultValue(aBuildMeta())
 
     @Test
     fun `present - should start with no user and then load user with success`() = runTest {
@@ -79,7 +73,6 @@ class HomePresenterTest {
         moleculeFlow(RecompositionMode.Immediate) {
             presenter.present()
         }.test {
-            if (isSpaceEnabled) skipItems(1)
             val initialState = awaitItem()
             assertThat(initialState.currentUserAndNeighbors.first()).isEqualTo(
                 MatrixUser(A_USER_ID, null, null)
@@ -91,8 +84,7 @@ class HomePresenterTest {
                 MatrixUser(A_USER_ID, A_USER_NAME, AN_AVATAR_URL)
             )
             assertThat(withUserState.showAvatarIndicator).isFalse()
-            assertThat(withUserState.isSpaceFeatureEnabled).isEqualTo(isSpaceEnabled)
-            assertThat(withUserState.showNavigationBar).isEqualTo(isSpaceEnabled)
+            assertThat(withUserState.showNavigationBar).isTrue()
         }
     }
 
@@ -115,23 +107,6 @@ class HomePresenterTest {
     }
 
     @Test
-    fun `present - space feature enabled`() = runTest {
-        val presenter = createHomePresenter(
-            featureFlagService = FakeFeatureFlagService(
-                initialState = mapOf(FeatureFlags.Space.key to true),
-            ),
-            sessionStore = InMemorySessionStore(
-                updateUserProfileResult = { _, _, _ -> },
-            ),
-        )
-        presenter.test {
-            skipItems(1)
-            val initialState = awaitItem()
-            assertThat(initialState.isSpaceFeatureEnabled).isTrue()
-        }
-    }
-
-    @Test
     fun `present - show avatar indicator`() = runTest {
         val indicatorService = FakeIndicatorService()
         val presenter = createHomePresenter(
@@ -143,7 +118,6 @@ class HomePresenterTest {
         moleculeFlow(RecompositionMode.Immediate) {
             presenter.present()
         }.test {
-            if (isSpaceEnabled) skipItems(1)
             val initialState = awaitItem()
             assertThat(initialState.showAvatarIndicator).isFalse()
             indicatorService.setShowRoomListTopBarIndicator(true)
@@ -168,7 +142,6 @@ class HomePresenterTest {
         moleculeFlow(RecompositionMode.Immediate) {
             presenter.present()
         }.test {
-            if (isSpaceEnabled) skipItems(1)
             val initialState = awaitItem()
             assertThat(initialState.currentUserAndNeighbors.first()).isEqualTo(MatrixUser(matrixClient.sessionId))
             // No new state is coming
@@ -189,7 +162,6 @@ class HomePresenterTest {
         moleculeFlow(RecompositionMode.Immediate) {
             presenter.present()
         }.test {
-            if (isSpaceEnabled) skipItems(1)
             val initialState = awaitItem()
             assertThat(initialState.currentHomeNavigationBarItem).isEqualTo(HomeNavigationBarItem.Chats)
             initialState.eventSink(HomeEvents.SelectHomeNavigationBarItem(HomeNavigationBarItem.Spaces))
@@ -201,14 +173,11 @@ class HomePresenterTest {
     }
 
     @Test
-    fun `present - NavigationBar is hidden when the last space is left`() = runTest {
+    fun `present - NavigationBar is hidden when the last space is left when the user can't create new spaces`() = runTest {
         val homeSpacesPresenter = MutablePresenter(aHomeSpacesState())
         val presenter = createHomePresenter(
             sessionStore = InMemorySessionStore(
                 updateUserProfileResult = { _, _, _ -> },
-            ),
-            featureFlagService = FakeFeatureFlagService(
-                initialState = mapOf(FeatureFlags.Space.key to true),
             ),
             homeSpacesPresenter = homeSpacesPresenter,
             announcementService = FakeAnnouncementService(
@@ -216,7 +185,6 @@ class HomePresenterTest {
             )
         )
         presenter.test {
-            skipItems(1)
             val initialState = awaitItem()
             assertThat(initialState.currentHomeNavigationBarItem).isEqualTo(HomeNavigationBarItem.Chats)
             assertThat(initialState.showNavigationBar).isTrue()
@@ -225,7 +193,7 @@ class HomePresenterTest {
             val spaceState = awaitItem()
             assertThat(spaceState.currentHomeNavigationBarItem).isEqualTo(HomeNavigationBarItem.Spaces)
             // The last space is left
-            homeSpacesPresenter.updateState(aHomeSpacesState(spaceRooms = emptyList()))
+            homeSpacesPresenter.updateState(aHomeSpacesState(spaceRooms = emptyList(), canCreateSpaces = false))
             skipItems(1)
             val finalState = awaitItem()
             // We are back to Chats
@@ -241,7 +209,6 @@ internal fun createHomePresenter(
     snackbarDispatcher: SnackbarDispatcher = SnackbarDispatcher(),
     rageshakeFeatureAvailability: RageshakeFeatureAvailability = RageshakeFeatureAvailability { flowOf(false) },
     indicatorService: IndicatorService = FakeIndicatorService(),
-    featureFlagService: FeatureFlagService = FakeFeatureFlagService(),
     homeSpacesPresenter: Presenter<HomeSpacesState> = Presenter { aHomeSpacesState() },
     sessionStore: SessionStore = InMemorySessionStore(),
     announcementService: AnnouncementService = FakeAnnouncementService(),
@@ -250,11 +217,10 @@ internal fun createHomePresenter(
     syncService = syncService,
     snackbarDispatcher = snackbarDispatcher,
     indicatorService = indicatorService,
-    logoutPresenter = { aDirectLogoutState() },
     roomListPresenter = { aRoomListState() },
     homeSpacesPresenter = homeSpacesPresenter,
+    logoutPresenter = { aDirectLogoutState() },
     rageshakeFeatureAvailability = rageshakeFeatureAvailability,
-    featureFlagService = featureFlagService,
     sessionStore = sessionStore,
     announcementService = announcementService,
 )

@@ -12,11 +12,13 @@ import io.element.android.libraries.androidutils.file.getSizeOfFiles
 import io.element.android.libraries.core.bool.orFalse
 import io.element.android.libraries.core.coroutine.CoroutineDispatchers
 import io.element.android.libraries.core.coroutine.childScope
+import io.element.android.libraries.core.data.bytes
 import io.element.android.libraries.core.data.tryOrNull
 import io.element.android.libraries.core.extensions.mapFailure
 import io.element.android.libraries.core.extensions.runCatchingExceptions
 import io.element.android.libraries.featureflag.api.FeatureFlagService
 import io.element.android.libraries.matrix.api.MatrixClient
+import io.element.android.libraries.matrix.api.analytics.SdkStoreSizes
 import io.element.android.libraries.matrix.api.core.DeviceId
 import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.RoomAlias
@@ -25,6 +27,8 @@ import io.element.android.libraries.matrix.api.core.RoomIdOrAlias
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.createroom.CreateRoomParameters
 import io.element.android.libraries.matrix.api.createroom.RoomPreset
+import io.element.android.libraries.matrix.api.linknewdevice.LinkDesktopHandler
+import io.element.android.libraries.matrix.api.linknewdevice.LinkMobileHandler
 import io.element.android.libraries.matrix.api.media.MatrixMediaLoader
 import io.element.android.libraries.matrix.api.oidc.AccountManagementAction
 import io.element.android.libraries.matrix.api.room.BaseRoom
@@ -45,6 +49,9 @@ import io.element.android.libraries.matrix.api.user.MatrixSearchUserResults
 import io.element.android.libraries.matrix.api.user.MatrixUser
 import io.element.android.libraries.matrix.impl.encryption.RustEncryptionService
 import io.element.android.libraries.matrix.impl.exception.mapClientException
+import io.element.android.libraries.matrix.impl.linknewdevice.RustLinkDesktopHandler
+import io.element.android.libraries.matrix.impl.linknewdevice.RustLinkMobileHandler
+import io.element.android.libraries.matrix.impl.linknewdevice.RustQrCodeDataParser
 import io.element.android.libraries.matrix.impl.mapper.map
 import io.element.android.libraries.matrix.impl.media.RustMediaLoader
 import io.element.android.libraries.matrix.impl.media.RustMediaPreviewService
@@ -144,7 +151,9 @@ class RustMatrixClient(
     private val sessionDispatcher = dispatchers.io.limitedParallelism(64)
 
     private val innerRoomListService = innerSyncService.roomListService()
-    private val innerSpaceService = innerClient.spaceService()
+
+    // TODO refactor this and `innerNotificationClient` to be behind a suspend function instead
+    private val innerSpaceService = runBlocking { innerClient.spaceService() }
 
     override val roomMembershipObserver = RoomMembershipObserver()
 
@@ -194,6 +203,7 @@ class RustMatrixClient(
         roomMembershipObserver = roomMembershipObserver,
         sessionCoroutineScope = sessionCoroutineScope,
         sessionDispatcher = sessionDispatcher,
+        analyticsService = analyticsService,
     )
 
     override val sessionVerificationService = RustSessionVerificationService(
@@ -360,6 +370,9 @@ class RustMatrixClient(
 
     override suspend fun createRoom(createRoomParams: CreateRoomParameters): Result<RoomId> = withContext(sessionDispatcher) {
         runCatchingExceptions {
+            val hasPublicAccess = createRoomParams.preset == RoomPreset.PUBLIC_CHAT || createRoomParams.joinRuleOverride == JoinRule.Public
+            val powerLevels = defaultRoomCreationPowerLevels(isSpace = createRoomParams.isSpace, isPublic = hasPublicAccess)
+
             val rustParams = RustCreateRoomParameters(
                 name = createRoomParams.name,
                 topic = createRoomParams.topic,
@@ -373,17 +386,18 @@ class RustMatrixClient(
                 },
                 invite = createRoomParams.invite?.map { it.value },
                 avatar = createRoomParams.avatar,
-                powerLevelContentOverride = defaultRoomCreationPowerLevels.copy(
+                powerLevelContentOverride = powerLevels.copy(
                     invite = if (createRoomParams.joinRuleOverride == JoinRule.Knock) {
                         // override the invite power level so it's the same as kick.
                         RoomMember.Role.Moderator.powerLevel.toInt()
                     } else {
-                        null
+                        powerLevels.invite
                     }
                 ),
                 joinRuleOverride = createRoomParams.joinRuleOverride?.map(),
                 historyVisibilityOverride = createRoomParams.historyVisibilityOverride?.map(),
                 canonicalAlias = createRoomParams.roomAliasName.getOrNull(),
+                isSpace = createRoomParams.isSpace,
             )
             val roomId = RoomId(innerClient.createRoom(rustParams))
             // Wait to receive the room back from the sync but do not returns failure if it fails.
@@ -566,6 +580,17 @@ class RustMatrixClient(
         return getCacheSize(includeCryptoDb = false)
     }
 
+    override suspend fun getDatabaseSizes(): Result<SdkStoreSizes> = runCatchingExceptions {
+        innerClient.getStoreSizes().run {
+            SdkStoreSizes(
+                stateStore = stateStore?.bytes,
+                eventCacheStore = eventCacheStore?.bytes,
+                mediaStore = mediaStore?.bytes,
+                cryptoStore = cryptoStore?.bytes,
+            )
+        }
+    }
+
     override suspend fun clearCache() {
         innerClient.clearCaches(innerSyncService)
         destroy()
@@ -726,6 +751,35 @@ class RustMatrixClient(
         }
     }
 
+    override suspend fun canLinkNewDevice(): Result<Boolean> = withContext(sessionDispatcher) {
+        runCatchingExceptions {
+            innerClient.isLoginWithQrCodeSupported()
+        }
+    }
+
+    override fun createLinkMobileHandler(): Result<LinkMobileHandler> {
+        return runCatchingExceptions {
+            val handler = innerClient.newGrantLoginWithQrCodeHandler()
+            RustLinkMobileHandler(
+                inner = handler,
+                sessionCoroutineScope = sessionCoroutineScope,
+                sessionDispatcher = sessionDispatcher,
+            )
+        }
+    }
+
+    override fun createLinkDesktopHandler(): Result<LinkDesktopHandler> {
+        return runCatchingExceptions {
+            val handler = innerClient.newGrantLoginWithQrCodeHandler()
+            RustLinkDesktopHandler(
+                inner = handler,
+                sessionCoroutineScope = sessionCoroutineScope,
+                sessionDispatcher = sessionDispatcher,
+                qrCodeDataParser = RustQrCodeDataParser(),
+            )
+        }
+    }
+
     override suspend fun markRoomAsFullyRead(roomId: RoomId, eventId: EventId): Result<Unit> = withContext(sessionDispatcher) {
         runCatchingExceptions {
             val room = innerClient.getRoom(roomId.value) ?: error("Could not fetch associated room")
@@ -737,6 +791,13 @@ class RustMatrixClient(
         runCatchingExceptions {
             Timber.d("Performing database vacuuming for session $sessionId...")
             innerClient.optimizeStores()
+        }
+    }
+
+    override suspend fun resetWellKnownConfig(): Result<Unit> {
+        return runCatchingExceptions {
+            Timber.d("Resetting well-known config for session $sessionId")
+            innerClient.resetWellKnown()
         }
     }
 
@@ -775,18 +836,23 @@ class RustMatrixClient(
     }
 }
 
-private val defaultRoomCreationPowerLevels = PowerLevels(
+private fun defaultRoomCreationPowerLevels(isPublic: Boolean, isSpace: Boolean) = PowerLevels(
     usersDefault = null,
-    eventsDefault = null,
+    // Only admins should be able to send events in general
+    eventsDefault = if (isSpace) 100 else null,
     stateDefault = null,
     ban = null,
     kick = null,
     redact = null,
-    invite = null,
+    invite = if (isPublic) 0 else 50,
     notifications = null,
     users = mapOf(),
-    events = mapOf(
-        "m.call.member" to 0,
-        "org.matrix.msc3401.call.member" to 0,
-    )
+    events = if (!isSpace) {
+        mapOf(
+            "m.call.member" to 0,
+            "org.matrix.msc3401.call.member" to 0,
+        )
+    } else {
+        mapOf()
+    }
 )
