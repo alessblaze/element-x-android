@@ -39,6 +39,7 @@ import io.element.android.libraries.matrix.api.room.RoomInfo
 import io.element.android.libraries.matrix.api.room.RoomMember
 import io.element.android.libraries.matrix.api.room.RoomMembershipObserver
 import io.element.android.libraries.matrix.api.room.alias.ResolvedRoomAlias
+import io.element.android.libraries.matrix.api.room.history.RoomHistoryVisibility
 import io.element.android.libraries.matrix.api.room.join.JoinRule
 import io.element.android.libraries.matrix.api.roomdirectory.RoomVisibility
 import io.element.android.libraries.matrix.api.roomlist.RoomListService
@@ -192,7 +193,6 @@ class RustMatrixClient(
         sessionDispatcher = sessionDispatcher,
         roomListFactory = RoomListFactory(
             innerRoomListService = innerRoomListService,
-            sessionCoroutineScope = sessionCoroutineScope,
             analyticsService = analyticsService,
         ),
         roomSyncSubscriber = roomSyncSubscriber,
@@ -417,6 +417,7 @@ class RustMatrixClient(
             isDirect = true,
             visibility = RoomVisibility.Private,
             preset = RoomPreset.TRUSTED_PRIVATE_CHAT,
+            historyVisibilityOverride = RoomHistoryVisibility.Invited,
             invite = listOf(userId),
         )
         return createRoom(createRoomParams)
