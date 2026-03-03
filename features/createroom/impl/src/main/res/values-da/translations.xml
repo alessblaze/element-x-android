@@ -27,6 +27,7 @@ Du kan ændre dette når som helst i rummets indstillinger."</string>
   <string name="screen_create_room_room_address_section_footer">"Hvis dette rum skal være synligt i det offentlige register, skal du bruge en adresse."</string>
   <string name="screen_create_room_room_address_section_title">"Adresse"</string>
   <string name="screen_create_room_room_visibility_section_title">"Rummets synlighed"</string>
+  <string name="screen_create_room_space_selection_no_space_option">"Tilføj ikke til et mellemrum"</string>
   <string name="screen_create_room_topic_label">"Emne (valgfrit)"</string>
   <string name="screen_create_room_topic_placeholder">"Tilføj beskrivelse…"</string>
 </resources>

@@ -40,6 +40,8 @@ import io.element.android.libraries.pushproviders.api.PushData
 import io.element.android.libraries.pushproviders.api.PushHandler
 import io.element.android.libraries.pushstore.api.UserPushStoreFactory
 import io.element.android.libraries.pushstore.api.clientsecret.PushClientSecret
+import io.element.android.services.analytics.api.AnalyticsLongRunningTransaction
+import io.element.android.services.analytics.api.AnalyticsService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -69,6 +71,7 @@ class DefaultPushHandler(
     private val fallbackNotificationFactory: FallbackNotificationFactory,
     private val syncOnNotifiableEvent: SyncOnNotifiableEvent,
     private val featureFlagService: FeatureFlagService,
+    private val analyticsService: AnalyticsService,
 ) : PushHandler {
     init {
         processPushEventResults()
@@ -121,6 +124,14 @@ class DefaultPushHandler(
                                         sessionId = request.sessionId,
                                         comment = "Push handled successfully but notification was filtered out",
                                     )
+                                } else if (exception is NotificationResolverException.EventRedacted) {
+                                    pushHistoryService.onSuccess(
+                                        providerInfo = request.providerInfo,
+                                        eventId = request.eventId,
+                                        roomId = request.roomId,
+                                        sessionId = request.sessionId,
+                                        comment = "Push handled successfully but event has been redacted",
+                                    )
                                 } else {
                                     val reason = when (exception) {
                                         is NotificationResolverException.EventNotFound -> "Event not found"
@@ -150,6 +161,10 @@ class DefaultPushHandler(
                         when (exception) {
                             is NotificationResolverException.EventFilteredOut -> {
                                 // Do nothing, we don't want to show a notification for filtered out events
+                                null
+                            }
+                            is NotificationResolverException.EventRedacted -> {
+                                // Do nothing, we don't want to show a notification for redacted events
                                 null
                             }
                             else -> {
@@ -215,6 +230,13 @@ class DefaultPushHandler(
      * @param providerInfo the provider info.
      */
     override suspend fun handle(pushData: PushData, providerInfo: String) {
+        // Start measuring how long it takes to display a notification from when the push is received
+        Timber.d("Calculating push-to-notification for event ${pushData.eventId}")
+        val parent = analyticsService.startLongRunningTransaction(AnalyticsLongRunningTransaction.PushToNotification(pushData.eventId.value))
+        if (featureFlagService.isFeatureEnabled(FeatureFlags.SyncNotificationsWithWorkManager)) {
+            analyticsService.startLongRunningTransaction(AnalyticsLongRunningTransaction.PushToWorkManager(pushData.eventId.value), parent)
+        }
+
         Timber.tag(loggerTag.value).d("## handling pushData: ${pushData.roomId}/${pushData.eventId}")
         if (buildMeta.lowPrivacyLoggingEnabled) {
             Timber.tag(loggerTag.value).d("## pushData: $pushData")
