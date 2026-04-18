@@ -126,6 +126,13 @@ enum class FeatureFlags(
         defaultValue = { false },
         isFinished = false,
     ),
+    AllowBlackTheme(
+        key = "feature.allow_black_theme",
+        title = "Allow black theme",
+        description = "Allow selecting the black appearance theme for battery saving on OLED.",
+        defaultValue = { false },
+        isFinished = false,
+    ),
     LiveLocationSharing(
         key = "feature.liveLocationSharing",
         title = "Live location sharing",
@@ -152,6 +159,13 @@ enum class FeatureFlags(
         key = "feature.slash_command",
         title = "Parse slash commands in the message composer",
         description = "Allow parsing slash commands in the message composer and perform action.",
+        defaultValue = { false },
+        isFinished = false,
+    ),
+    RoomThreadList(
+        key = "feature.room_thread_list",
+        title = "Add a list of threads in a room",
+        description = "Add a new screen with a list of threads in a room.",
         defaultValue = { false },
         isFinished = false,
     ),
