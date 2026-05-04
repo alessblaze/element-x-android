@@ -30,44 +30,10 @@
         <activity
             android:name=".ui.ChatNitCallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden|keyboard|navigation|uiMode"
-            android:exported="true"
             android:label="@string/element_call"
             android:launchMode="singleTask"
             android:supportsPictureInPicture="true"
-            android:taskAffinity="com.ams.chatnit.features.call">
-
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="https" />
-
-                <!-- Matching asset file: https://call.chatnit.com/.well-known/assetlinks.json -->
-                <data android:host="call.chatnit.com" />
-            </intent-filter>
-            <!-- Custom scheme to handle urls from other domains in the format: element://call?url=https%3A%2F%2Felement.io -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="chatnit" />
-                <data android:host="call" />
-            </intent-filter>
-            <!-- Custom scheme to handle urls from other domains in the format: io.element.call:/?url=https%3A%2F%2Felement.io -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="com.chatnit.call" />
-            </intent-filter>
-
-        </activity>
+            android:taskAffinity="io.element.android.features.call" />
 
         <activity
             android:name=".ui.IncomingCallActivity"
