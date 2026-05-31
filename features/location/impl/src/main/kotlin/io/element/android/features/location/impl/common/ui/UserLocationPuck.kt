@@ -18,12 +18,12 @@ import org.maplibre.compose.location.DesiredAccuracy
 import org.maplibre.compose.location.LocationPuck
 import org.maplibre.compose.location.LocationPuckColors
 import org.maplibre.compose.location.LocationPuckSizes
-import org.maplibre.compose.location.LocationTrackingEffect
 import org.maplibre.compose.location.UserLocationState
 import org.maplibre.compose.location.rememberAndroidLocationProvider
 import org.maplibre.compose.location.rememberNullLocationProvider
 import org.maplibre.compose.location.rememberUserLocationState
-import kotlin.time.Duration.Companion.minutes
+import org.maplibre.spatialk.units.extensions.meters
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun UserLocationPuck(
@@ -31,22 +31,24 @@ fun UserLocationPuck(
     locationState: UserLocationState,
     trackUserLocation: Boolean,
 ) {
-    LocationTrackingEffect(
+    SimpleLocationTrackingEffect(
         locationState = locationState,
         enabled = trackUserLocation,
-    ) {
-        val finalPosition = cameraState.position.copy(
-            target = currentLocation.position,
-            bearing = currentLocation.bearing ?: cameraState.position.bearing,
+    ) { currentLocation ->
+        val target = currentLocation?.position?.value ?: cameraState.position.target
+        val newPosition = cameraState.position.copy(
+            target = target,
+            // Force pointing to NORTH
+            bearing = 0.0,
             zoom = cameraState.position.zoom.coerceAtLeast(MapDefaults.DEFAULT_ZOOM)
         )
-        cameraState.animateTo(finalPosition)
+        cameraState.animateTo(newPosition)
     }
     val location = locationState.location
     if (location != null) {
         LocationPuck(
             idPrefix = "user-location",
-            locationState = locationState,
+            location = location,
             cameraState = cameraState,
             accuracyThreshold = Float.POSITIVE_INFINITY,
             showBearingAccuracy = false,
@@ -72,9 +74,9 @@ fun rememberUserLocationState(hasLocationPermission: Boolean): UserLocationState
         rememberNullLocationProvider()
     } else {
         rememberAndroidLocationProvider(
-            updateInterval = 1.minutes,
-            desiredAccuracy = DesiredAccuracy.Balanced,
-            minDistanceMeters = 50f,
+            updateInterval = 5.seconds,
+            desiredAccuracy = DesiredAccuracy.High,
+            minDistance = 5.meters,
         )
     }
     return rememberUserLocationState(locationProvider)

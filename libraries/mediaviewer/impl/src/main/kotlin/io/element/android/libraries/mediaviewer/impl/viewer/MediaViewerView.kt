@@ -31,8 +31,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -41,7 +44,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -49,9 +51,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
@@ -59,10 +64,12 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.core.text.toSpannable
 import coil3.compose.AsyncImage
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.viewfolder.api.TextFileViewer
+import io.element.android.libraries.androidutils.text.safeLinkify
 import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.audio.api.AudioFocus
 import io.element.android.libraries.core.mimetype.MimeTypes.isMimeTypeVideo
@@ -91,7 +98,9 @@ import io.element.android.libraries.mediaviewer.impl.local.LocalMediaView
 import io.element.android.libraries.mediaviewer.impl.local.PlayableState
 import io.element.android.libraries.mediaviewer.impl.local.rememberLocalMediaViewState
 import io.element.android.libraries.mediaviewer.impl.util.bgCanvasWithTransparency
+import io.element.android.libraries.textcomposer.ElementRichTextEditorStyle
 import io.element.android.libraries.ui.strings.CommonStrings
+import io.element.android.wysiwyg.compose.EditorStyledText
 import kotlinx.coroutines.delay
 import me.saket.telephoto.zoomable.OverzoomEffect
 import me.saket.telephoto.zoomable.ZoomSpec
@@ -171,9 +180,11 @@ fun MediaViewerView(
         val pagerState = rememberPagerState(state.currentIndex, 0f) {
             state.listData.size
         }
-        LaunchedEffect(pagerState) {
-            snapshotFlow { pagerState.currentPage }.collect { page ->
-                state.eventSink(MediaViewerEvent.OnNavigateTo(page))
+
+        LaunchedEffect(pagerState.targetPage, state.currentIndex) {
+            // Only emit an index navigation change when it's triggered by the user scrolling
+            if (pagerState.targetPage != state.currentIndex && pagerState.isScrollInProgress) {
+                state.eventSink(MediaViewerEvent.OnNavigateTo(pagerState.targetPage))
             }
         }
         HorizontalPager(
@@ -182,6 +193,7 @@ fun MediaViewerView(
             // Pre-load previous and next pages
             beyondViewportPageCount = 1,
             key = { index -> state.listData[index].pagerKey },
+            reverseLayout = true,
         ) { page ->
             when (val dataForPage = state.listData[page]) {
                 is MediaViewerPageData.Failure -> {
@@ -200,11 +212,16 @@ fun MediaViewerView(
                 }
                 is MediaViewerPageData.MediaViewerData -> {
                     var bottomPaddingInPixels by remember { mutableIntStateOf(defaultBottomPaddingInPixels) }
-                    LaunchedEffect(Unit) {
-                        state.eventSink(MediaViewerEvent.LoadMedia(dataForPage))
-                    }
                     Box(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .onVisibilityChanged(minDurationMs = 200L) { isVisible ->
+                                if (isVisible) {
+                                    state.eventSink(MediaViewerEvent.LoadMedia(dataForPage))
+                                } else {
+                                    state.eventSink(MediaViewerEvent.CancelLoadingMedia(dataForPage))
+                                }
+                            }
+                            .fillMaxSize()
                     ) {
                         val isDisplayed = remember(pagerState.settledPage) {
                             // This 'item provider' lambda will be called when the data source changes with an outdated `settlePage` value
@@ -241,6 +258,7 @@ fun MediaViewerView(
                             MediaViewerBottomBar(
                                 showDivider = dataForPage.mediaInfo.mimeType.isMimeTypeVideo(),
                                 caption = dataForPage.mediaInfo.caption,
+                                formattedCaption = dataForPage.mediaInfo.formattedCaption,
                                 onHeightChange = { bottomPaddingInPixels = it },
                             )
                         }
@@ -479,14 +497,20 @@ private fun MediaViewerTopBar(
     TopAppBar(
         title = {
             if (senderName != null && dateSent != null) {
+                val description = stringResource(
+                    CommonStrings.a11y_sent_by_sender_at_date,
+                    senderName,
+                    dateSent,
+                )
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clearAndSetSemantics {
+                            heading()
+                            contentDescription = description
+                        },
                 ) {
                     Text(
-                        modifier = Modifier.semantics {
-                            heading()
-                        },
                         text = senderName,
                         style = ElementTheme.typography.fontBodyMdMedium,
                         color = ElementTheme.colors.textPrimary,
@@ -544,6 +568,7 @@ private fun MediaViewerTopBar(
 @Composable
 private fun MediaViewerBottomBar(
     caption: String?,
+    formattedCaption: CharSequence?,
     showDivider: Boolean,
     onHeightChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -556,7 +581,7 @@ private fun MediaViewerBottomBar(
                 onHeightChange(it.height)
             },
     ) {
-        if (caption != null) {
+        if (caption != null || formattedCaption != null) {
             if (showDivider) {
                 HorizontalDivider()
             }
@@ -567,15 +592,28 @@ private fun MediaViewerBottomBar(
                     .fillMaxWidth()
                     .heightIn(max = if (hasCompactHeightWindowSize()) maxCaptionHeightLandscape else maxCaptionHeightPortrait),
             ) {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .verticalScroll(scrollState)
-                        .navigationBarsPadding(),
-                    text = caption,
-                    style = ElementTheme.typography.fontBodyLgRegular,
-                )
+                val textToRender = when {
+                    formattedCaption != null -> formattedCaption
+                    caption != null -> caption.safeLinkify().toSpannable()
+                    else -> null
+                }
+                if (textToRender != null) {
+                    CompositionLocalProvider(
+                        LocalContentColor provides ElementTheme.colors.textPrimary,
+                        LocalTextStyle provides ElementTheme.typography.fontBodyLgRegular
+                    ) {
+                        EditorStyledText(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                                .verticalScroll(scrollState)
+                                .navigationBarsPadding(),
+                            text = textToRender,
+                            style = ElementRichTextEditorStyle.textStyle(),
+                            releaseOnDetach = false,
+                        )
+                    }
+                }
                 if (showBottomShadow) {
                     Box(
                         modifier = Modifier

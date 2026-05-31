@@ -50,6 +50,7 @@ import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.ui.strings.CommonStrings
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import org.maplibre.compose.camera.CameraMoveReason
 import org.maplibre.compose.camera.CameraPosition
@@ -100,6 +101,7 @@ fun ShowLocationView(
         }
     }
     MapBottomSheetScaffold(
+        customMapStyleUrl = state.customMapStyleUrl,
         sheetDragHandle = if (state.isSheetDraggable) {
             { BottomSheetDefaults.DragHandle() }
         } else {
@@ -147,12 +149,15 @@ fun ShowLocationView(
                         LocationShareRow(
                             item = locationShare,
                             onShareClick = { state.eventSink(ShowLocationEvent.Share(locationShare.location)) },
+                            onStopClick = { state.eventSink(ShowLocationEvent.StopLocationSharing) },
                             modifier = Modifier.clickable {
                                 state.eventSink(ShowLocationEvent.TrackMyLocation(false))
                                 val position = CameraPosition(
                                     padding = sheetPaddings,
                                     target = Position(locationShare.location.lon, locationShare.location.lat),
-                                    zoom = MapDefaults.DEFAULT_ZOOM
+                                    // Force pointing to NORTH
+                                    bearing = 0.0,
+                                    zoom = cameraState.position.zoom.coerceAtLeast(MapDefaults.DEFAULT_ZOOM),
                                 )
                                 coroutineScope.launch {
                                     cameraState.animateTo(finalPosition = position)
@@ -170,7 +175,7 @@ fun ShowLocationView(
                 trackUserLocation = state.isTrackMyLocation
             )
             val markers = remember(state.locationShares) {
-                state.locationShares.map { it.toMarkerData() }
+                state.locationShares.map { it.toMarkerData() }.toImmutableList()
             }
             LocationPinMarkers(markers)
         },

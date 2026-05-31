@@ -13,6 +13,8 @@ package io.element.android.features.roomdetails.impl
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.AndroidComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -126,10 +128,7 @@ class RoomDetailsViewTest {
                 state = aRoomDetailsState(
                     eventSink = EventsRecorder(expectEvents = false),
                     canInvite = true,
-                    roomType = RoomDetailsType.Dm(
-                        aRoomMember(UserId("@me:local.org")),
-                        aRoomMember(UserId("@other:local.org"))
-                    ),
+                    roomType = RoomDetailsType.Dm(aRoomMember(UserId("@other:local.org"))),
                 ),
                 onJoinCallClick = callback,
             )
@@ -232,10 +231,7 @@ class RoomDetailsViewTest {
     fun `click on avatar test on DM`() = runAndroidComposeUiTest {
         val eventsRecorder = EventsRecorder<RoomDetailsEvent>(expectEvents = false)
         val state = aRoomDetailsState(
-            roomType = RoomDetailsType.Dm(
-                aRoomMember(),
-                aDmRoomMember(avatarUrl = "an_avatar_url"),
-            ),
+            roomType = RoomDetailsType.Dm(aDmRoomMember(avatarUrl = "an_avatar_url"),),
             roomName = "Daniel",
             eventSink = eventsRecorder,
         )
@@ -244,7 +240,7 @@ class RoomDetailsViewTest {
             state = state,
             openAvatarPreview = callback,
         )
-        onNodeWithTag(TestTags.memberDetailAvatar.value).performClick()
+        onNodeWithTag(TestTags.roomDetailAvatar.value).performClick()
         callback.assertSuccess()
     }
 
@@ -343,6 +339,25 @@ class RoomDetailsViewTest {
                 onProfileClick = callback,
             )
             clickOn(R.string.screen_room_details_profile_row_title)
+        }
+    }
+
+    @Config(qualifiers = "h1024dp")
+    @Test
+    fun `click on invite invokes the expected callback`() = runAndroidComposeUiTest {
+        ensureCalledOnce { callback ->
+            setRoomDetailView(
+                state = aRoomDetailsState(
+                    eventSink = EventsRecorder(expectEvents = false),
+                    roomType = RoomDetailsType.Dm(
+                        aDmRoomMember(userId = UserId("@other:local.org")),
+                    ),
+                    roomMemberDetailsState = aUserProfileState(userId = A_USER_ID),
+                    canInvite = true,
+                ),
+                invitePeople = callback,
+            )
+            onAllNodesWithText(activity!!.getString(R.string.screen_room_details_invite_title)).onLast().performClick()
         }
     }
 }

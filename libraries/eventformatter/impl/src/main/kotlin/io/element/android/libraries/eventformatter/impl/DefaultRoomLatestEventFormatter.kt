@@ -54,6 +54,7 @@ class DefaultRoomLatestEventFormatter(
     private val roomMembershipContentFormatter: RoomMembershipContentFormatter,
     private val profileChangeContentFormatter: ProfileChangeContentFormatter,
     private val stateContentFormatter: StateContentFormatter,
+    private val rtcNotificationContentFormatter: RtcNotificationContentFormatter,
     private val permalinkParser: PermalinkParser,
 ) : RoomLatestEventFormatter {
     override fun format(
@@ -92,8 +93,8 @@ class DefaultRoomLatestEventFormatter(
                 message.prefixIfNeeded(senderDisambiguatedDisplayName, isDmRoom, isOutgoing)
             }
             is StickerContent -> {
-                val message = sp.getString(CommonStrings.common_sticker) + " (" + content.bestDescription + ")"
-                message.prefixIfNeeded(senderDisambiguatedDisplayName, isDmRoom, isOutgoing)
+                content.bestDescription.prefixWith(sp.getString(CommonStrings.common_sticker))
+                    .prefixIfNeeded(senderDisambiguatedDisplayName, isDmRoom, isOutgoing)
             }
             is UnableToDecryptContent -> {
                 val message = sp.getString(CommonStrings.common_waiting_for_decryption_key)
@@ -109,8 +110,8 @@ class DefaultRoomLatestEventFormatter(
                 stateContentFormatter.format(content, senderDisambiguatedDisplayName, isOutgoing, RenderingMode.RoomList)
             }
             is PollContent -> {
-                val message = sp.getString(CommonStrings.common_poll_summary, content.question)
-                message.prefixIfNeeded(senderDisambiguatedDisplayName, isDmRoom, isOutgoing)
+                content.question.prefixWith(sp.getString(CommonStrings.common_poll_summary_prefix))
+                    .prefixIfNeeded(senderDisambiguatedDisplayName, isDmRoom, isOutgoing)
             }
             is FailedToParseMessageLikeContent, is FailedToParseStateContent, is UnknownContent -> {
                 val message = sp.getString(CommonStrings.common_unsupported_event)
@@ -121,7 +122,7 @@ class DefaultRoomLatestEventFormatter(
                 message.prefixIfNeeded(senderDisambiguatedDisplayName, isDmRoom, isOutgoing)
             }
             is LegacyCallInviteContent -> sp.getString(CommonStrings.common_unsupported_call)
-            is CallNotifyContent -> sp.getString(CommonStrings.common_call_started)
+            is CallNotifyContent -> rtcNotificationContentFormatter.format(content, isDmRoom)
         }?.take(DEFAULT_SAFE_LENGTH)
     }
 

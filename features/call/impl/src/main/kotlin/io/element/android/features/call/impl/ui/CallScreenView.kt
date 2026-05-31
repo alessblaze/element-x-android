@@ -20,11 +20,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -92,6 +94,7 @@ internal fun CallScreenView(
     Scaffold(
         modifier = modifier,
         containerColor = if (isLightTheme) Color(0xffc8abe0) else Color(0xff210538),
+        contentWindowInsets = WindowInsets.systemBars,
     ) { padding ->
         BackHandler {
             handleBack(fromNative = true)
@@ -155,6 +158,7 @@ internal fun CallScreenView(
                 },
                 onDestroyWebView = {
                     callWebView = null
+                    // Reset audio mode
                     webViewAudioManager?.onCallStopped()
                 }
             )
@@ -163,7 +167,7 @@ internal fun CallScreenView(
                 is AsyncData.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         LoadingWaveform()
                     }
@@ -279,9 +283,7 @@ private fun WebView.setup(
 
 private fun WebView.addBackHandler(onBackPressed: () -> Unit) {
     addJavascriptInterface(
-        JavascriptBackHandler {
-            onBackPressed()
-        },
+        JavascriptBackHandlerBridge(callback = onBackPressed),
         "backHandler"
     )
 }
@@ -351,7 +353,11 @@ internal fun InvalidAudioDeviceDialogPreview() = ElementPreview {
     InvalidAudioDeviceDialog(invalidAudioDeviceReason = InvalidAudioDeviceReason.BT_AUDIO_DEVICE_DISABLED) {}
 }
 
-internal fun interface JavascriptBackHandler {
+internal class JavascriptBackHandlerBridge(
+    private val callback: () -> Unit,
+) {
     @JavascriptInterface
-    fun onBackPressed()
+    fun onBackPressed() {
+        callback()
+    }
 }

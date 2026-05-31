@@ -5,8 +5,6 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-@file:OptIn(ExperimentalTestApi::class)
-
 package io.element.android.features.call.ui
 
 import android.view.KeyEvent
@@ -19,10 +17,12 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runAndroidComposeUiTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.element.android.features.call.impl.pip.PictureInPictureEvent
+import io.element.android.features.call.impl.pip.PictureInPictureState
 import io.element.android.features.call.impl.pip.aPictureInPictureState
 import io.element.android.features.call.impl.ui.CallScreenEvent
+import io.element.android.features.call.impl.ui.CallScreenState
 import io.element.android.features.call.impl.ui.CallScreenView
-import io.element.android.features.call.impl.ui.JavascriptBackHandler
+import io.element.android.features.call.impl.ui.JavascriptBackHandlerBridge
 import io.element.android.features.call.impl.ui.aCallScreenState
 import io.element.android.tests.testutils.EventsRecorder
 import io.element.android.tests.testutils.pressBackKey
@@ -35,6 +35,7 @@ import org.robolectric.annotation.Implements
 import org.robolectric.annotation.Resetter
 import org.robolectric.shadows.ShadowWebView
 
+@OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 class CallScreenViewTest {
     @Test
@@ -57,6 +58,7 @@ class CallScreenViewTest {
         setCallScreenView(
             state = aCallScreenState(),
             useInspectionMode = false,
+            pipState = aPictureInPictureState(supportPip = false),
         )
 
         pressBackKey()
@@ -93,10 +95,11 @@ class CallScreenViewTest {
     }
 }
 
-private fun AndroidComposeUiTest<ComponentActivity>.setCallScreenView(
-    state: io.element.android.features.call.impl.ui.CallScreenState,
+@OptIn(ExperimentalTestApi::class)
+private fun <A : ComponentActivity> AndroidComposeUiTest<A>.setCallScreenView(
+    state: CallScreenState,
     useInspectionMode: Boolean,
-    pipState: io.element.android.features.call.impl.pip.PictureInPictureState = aPictureInPictureState(supportPip = false),
+    pipState: PictureInPictureState = aPictureInPictureState(supportPip = false),
 ) {
     setContent {
         // Inspection mode disables AndroidView creation; keep it configurable per test.
@@ -115,7 +118,7 @@ private fun AndroidComposeUiTest<ComponentActivity>.setCallScreenView(
 internal class RecordingShadowWebView : ShadowWebView() {
     companion object {
         val dispatchedEvents = mutableListOf<KeyEvent>()
-        private var backHandlerJavascriptInterface: JavascriptBackHandler? = null
+        private var backHandlerJavascriptInterface: JavascriptBackHandlerBridge? = null
 
         @Resetter
         @JvmStatic
@@ -135,7 +138,7 @@ internal class RecordingShadowWebView : ShadowWebView() {
     protected override fun addJavascriptInterface(`object`: Any, name: String) {
         super.addJavascriptInterface(`object`, name)
         if (name == "backHandler") {
-            backHandlerJavascriptInterface = `object` as? JavascriptBackHandler
+            backHandlerJavascriptInterface = `object` as? JavascriptBackHandlerBridge
         }
     }
 
