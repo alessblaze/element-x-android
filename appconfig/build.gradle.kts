@@ -41,7 +41,7 @@ android {
             value = if (isEnterpriseBuild) {
                 BuildTimeConfig.BUG_REPORT_APP_NAME ?: ""
             } else {
-                "element-x-android"
+                "chatnit-android"
             },
         )
     }
